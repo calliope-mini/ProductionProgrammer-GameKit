@@ -16,23 +16,36 @@ APP_DONE_LED=7
 # Utility function to export a pin if not already exported
 exportPin() {
   if [ ! -e /sys/class/gpio/gpio$1 ]; then
-    echo "$1" > /sys/class/gpio/export
+    echo "$1" > /sys/class/gpio/export 2>/dev/null
+    # Wait a bit and retry if it failed
+    if [ ! -e /sys/class/gpio/gpio$1 ]; then
+      sleep 0.1
+      echo "$1" > /sys/class/gpio/export 2>/dev/null
+    fi
   fi
 }
 
 # Utility function to set a pin as an output
 setOutput() {
-  echo "out" > /sys/class/gpio/gpio$1/direction
+  if [ -e /sys/class/gpio/gpio$1/direction ]; then
+    echo "out" > /sys/class/gpio/gpio$1/direction
+  else
+    printf "${RED}Warning: GPIO$1 not available${DEF}\n"
+  fi
 }
 
 # Utility function to change state of a light
 setLightState() {
-  echo $2 > /sys/class/gpio/gpio$1/value
+  if [ -e /sys/class/gpio/gpio$1/value ]; then
+    echo $2 > /sys/class/gpio/gpio$1/value
+  fi
 }
 
 # Initialize GPIO pins
 exportPin $IF_DONE_LED
 exportPin $APP_DONE_LED
+# Give time for GPIO export to complete
+sleep 0.1
 setOutput $IF_DONE_LED
 setOutput $APP_DONE_LED
 
@@ -53,7 +66,7 @@ while true; do # Main production loop
             setLightState $IF_DONE_LED 0
             
             # Check if STM32F030 target is connected and responsive
-            openocd -f interface/stlink.cfg -f target/stm32f0x.cfg -c "init; targets; exit" >detect.log 2>&1
+            openocd -f interface/stlink.cfg -f target/stm32f0x.cfg -c "adapter speed 400; init; targets; exit" >detect.log 2>&1
             TARGET_DETECTED=$(grep -c "Cortex-M0.*processor detected\|Examination succeed" detect.log)
             
             if ((TARGET_DETECTED > 0)); then 
@@ -74,10 +87,10 @@ while true; do # Main production loop
         
         # Unlock and Flash GameKit Firmware to STM32F030
         printf "${MAG}Unlocking STM32F030${DEF}\n"
-        openocd -f interface/stlink.cfg -f target/stm32f0x.cfg -c "init; reset halt; stm32f0x unlock 0; exit" > unlock.log 2>&1
+        openocd -f interface/stlink.cfg -f target/stm32f0x.cfg -c "adapter speed 400; init; reset halt; stm32f0x unlock 0; exit" > unlock.log 2>&1
         
         printf "${MAG}Start flashing STM32F030 with GameKit firmware${DEF}\n"
-        openocd -f interface/stlink.cfg -f target/stm32f0x.cfg -c "init; reset halt; flash write_image erase $APPLICATION_FW; verify_image $APPLICATION_FW; reset run; exit" > flash.log 2>&1
+        openocd -f interface/stlink.cfg -f target/stm32f0x.cfg -c "adapter speed 400; init; reset halt; flash write_image erase $APPLICATION_FW; verify_image $APPLICATION_FW; reset run; exit" > flash.log 2>&1
         FLASHED=$(grep -c "flash size\|wrote.*bytes\|verified.*bytes\|Examination succeed" flash.log)
         
         if (( FLASHED > 0 )); then 
@@ -107,7 +120,7 @@ while true; do # Main production loop
         # Wait for STM32F030 disconnection
         printf "${MAG}Test and disconnect STM32F030${DEF}\n"
         while true; do
-            openocd -f interface/stlink.cfg -f target/stm32f0x.cfg -c "init; targets; exit" >detect.log 2>&1
+            openocd -f interface/stlink.cfg -f target/stm32f0x.cfg -c "adapter speed 400; init; targets; exit" >detect.log 2>&1
             TARGET_DETECTED=$(grep -c "Cortex-M0.*processor detected\|Examination succeed" detect.log)
             
             if ((TARGET_DETECTED > 0)); then 
