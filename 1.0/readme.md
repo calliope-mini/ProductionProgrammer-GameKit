@@ -1,4 +1,12 @@
 ## Requirements
+- Raspberry Pi 
+- STLink 
+- openocd V0.12
+
+- udevrule 
+- sudo usermod -a -G dialout $USER
+
+
 - Raspberry Pi 3b
 - Raspberry Pi OS 32bit,
 - JLink Arm 32bit  https://www.segger.com/downloads/jlink/JLink_Linux_arm.tgz, tried with version 7.88k
