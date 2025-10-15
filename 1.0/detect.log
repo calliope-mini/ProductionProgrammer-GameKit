@@ -1,0 +1,10 @@
+xPack Open On-Chip Debugger 0.12.0+dev-02228-ge5888bda3-dirty (2025-10-04-22:42)
+Licensed under GNU GPL v2
+For bug reports, read
+	http://openocd.org/doc/doxygen/bugs.html
+Warn : DEPRECATED: auto-selecting transport "swd (dapdirect)". Use 'transport select swd' to suppress this message.
+Info : STLINK V3J15M7 (API v3) VID:PID 0483:3754
+Info : Target voltage: 0.001597
+Error: target voltage may be too low for reliable debugging
+Error: init mode failed (unable to connect to the target)
+
