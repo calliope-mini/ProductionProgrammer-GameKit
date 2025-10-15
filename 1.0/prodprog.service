@@ -1,11 +1,11 @@
 [Unit]
 Description=Service for STM32F030 GameKit Programming
-After=multi.user.target
+After=multi-user.target
 
 [Service]
 User=root
-WorkingDirectory=/home/pi/ProductionProgrammer-GameKit/1.0/
-ExecStart=/bin/bash -c /home/pi/ProductionProgrammer-GameKit/1.0/prodprog.sh
+WorkingDirectory=/home/hugo/ProductionProgrammer-GameKit/1.0/
+ExecStart=/bin/bash -c /home/hugo/ProductionProgrammer-GameKit/1.0/prodprog.sh
 Restart=always
 
 [Install]
