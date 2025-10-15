@@ -3,10 +3,13 @@ Description=Service for STM32F030 GameKit Programming
 After=multi-user.target
 
 [Service]
-User=root
+Group=dialout
 WorkingDirectory=/home/hugo/ProductionProgrammer-GameKit/1.0/
 ExecStart=/bin/bash -c /home/hugo/ProductionProgrammer-GameKit/1.0/prodprog.sh
 Restart=always
+RestartSec=5
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
 
 [Install]
 WantedBy=multi-user.target
