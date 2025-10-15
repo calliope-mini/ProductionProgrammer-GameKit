@@ -9,18 +9,24 @@ RED='\x1b[39;41;1m'
 DEF='\x1b[39;49m'
 GRE='\x1b[32;49m'
 
-# LEDs on Header on GPIO 21 and 7
-IF_DONE_LED=21
-APP_DONE_LED=7
+# LEDs on Header on GPIO 18 and 19 (more compatible with Pi 4)
+IF_DONE_LED=18
+APP_DONE_LED=19
 
 # Utility function to export a pin if not already exported
 exportPin() {
   if [ ! -e /sys/class/gpio/gpio$1 ]; then
-    echo "$1" > /sys/class/gpio/export 2>/dev/null
+    # Try to export with sudo for Pi 4 compatibility
+    echo "$1" | sudo tee /sys/class/gpio/export >/dev/null 2>&1
     # Wait a bit and retry if it failed
     if [ ! -e /sys/class/gpio/gpio$1 ]; then
-      sleep 0.1
-      echo "$1" > /sys/class/gpio/export 2>/dev/null
+      sleep 0.2
+      echo "$1" | sudo tee /sys/class/gpio/export >/dev/null 2>&1
+    fi
+    # Make it accessible to the user
+    if [ -e /sys/class/gpio/gpio$1 ]; then
+      sudo chown $USER:$USER /sys/class/gpio/gpio$1/direction 2>/dev/null
+      sudo chown $USER:$USER /sys/class/gpio/gpio$1/value 2>/dev/null
     fi
   fi
 }
