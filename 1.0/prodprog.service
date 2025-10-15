@@ -9,7 +9,7 @@ WorkingDirectory=/home/hugo/ProductionProgrammer-GameKit/1.0/
 ExecStart=/home/hugo/ProductionProgrammer-GameKit/1.0/prodprog.sh
 Restart=always
 RestartSec=5
-Environment=PATH=/home/hugo/xpack-openocd-0.12.0.-7/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+Environment=PATH=/home/hugo/xpack-openocd-0.12.0-7/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 
 [Install]
