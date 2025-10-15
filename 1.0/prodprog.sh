@@ -20,7 +20,7 @@ setLightState() {
   
   if [ "$2" = "1" ]; then
     # Turn LED ON (run in background to keep it on)
-    gpioset --mode=signal gpiochip0 $1=1 &
+    gpioset gpiochip0 $1=1 &
   else
     # Turn LED OFF (just set to 0, no need to keep process running)
     gpioset gpiochip0 $1=0 2>/dev/null
@@ -29,6 +29,15 @@ setLightState() {
 
 # Initialize GPIO pins (Pi 4 compatible - no export needed with gpioset)
 printf "${GRE}Initializing GPIO LEDs on pins $IF_DONE_LED and $APP_DONE_LED${DEF}\n"
+
+# Debug environment info
+printf "${MAG}=== Environment Debug ===${DEF}\n"
+printf "User: $(whoami)\n"
+printf "Groups: $(groups)\n" 
+printf "USB devices: $(lsusb | grep -i st)\n"
+printf "OpenOCD path: $(which openocd)\n"
+printf "Working directory: $(pwd)\n"
+printf "${MAG}=== End Environment Debug ===${DEF}\n"
 
 # Test LEDs briefly
 printf "${MAG}Testing LEDs...${DEF}\n"
@@ -68,9 +77,15 @@ while true; do # Main production loop
                     printf "${RED}STM32F030: Target voltage too low - check power connection${DEF}\n"
                 elif grep -q "unable to connect to the target" detect.log; then
                     printf "${RED}STM32F030: Unable to connect - check SWD connections${DEF}\n"
+                elif grep -q "open failed" detect.log; then
+                    printf "${RED}STM32F030: ST-Link open failed - USB permission issue${DEF}\n"
                 else
                     printf "${RED}STM32F030 target not detected: Connect STM32F030${DEF}\n"
                 fi
+                # Show the actual OpenOCD output for debugging
+                printf "${MAG}=== OpenOCD Debug Output ===${DEF}\n"
+                cat detect.log
+                printf "${MAG}=== End Debug Output ===${DEF}\n"
                 sleep 1
             fi
         done
