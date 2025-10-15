@@ -13,47 +13,13 @@ GRE='\x1b[32;49m'
 IF_DONE_LED=18
 APP_DONE_LED=19
 
-# Utility function to export a pin if not already exported
-exportPin() {
-  if [ ! -e /sys/class/gpio/gpio$1 ]; then
-    # Try to export with sudo for Pi 4 compatibility
-    echo "$1" | sudo tee /sys/class/gpio/export >/dev/null 2>&1
-    # Wait a bit and retry if it failed
-    if [ ! -e /sys/class/gpio/gpio$1 ]; then
-      sleep 0.2
-      echo "$1" | sudo tee /sys/class/gpio/export >/dev/null 2>&1
-    fi
-    # Make it accessible to the user
-    if [ -e /sys/class/gpio/gpio$1 ]; then
-      sudo chown $USER:$USER /sys/class/gpio/gpio$1/direction 2>/dev/null
-      sudo chown $USER:$USER /sys/class/gpio/gpio$1/value 2>/dev/null
-    fi
-  fi
-}
-
-# Utility function to set a pin as an output
-setOutput() {
-  if [ -e /sys/class/gpio/gpio$1/direction ]; then
-    echo "out" > /sys/class/gpio/gpio$1/direction
-  else
-    printf "${RED}Warning: GPIO$1 not available${DEF}\n"
-  fi
-}
-
-# Utility function to change state of a light
+# Utility function to change state of a light using gpioset (Pi 4 compatible)
 setLightState() {
-  if [ -e /sys/class/gpio/gpio$1/value ]; then
-    echo $2 > /sys/class/gpio/gpio$1/value
-  fi
+  gpioset gpiochip0 $1=$2 2>/dev/null || printf "${RED}Warning: GPIO$1 set failed${DEF}\n"
 }
 
-# Initialize GPIO pins
-exportPin $IF_DONE_LED
-exportPin $APP_DONE_LED
-# Give time for GPIO export to complete
-sleep 0.1
-setOutput $IF_DONE_LED
-setOutput $APP_DONE_LED
+# Initialize GPIO pins (Pi 4 compatible - no export needed with gpioset)
+printf "${GRE}Initializing GPIO LEDs on pins $IF_DONE_LED and $APP_DONE_LED${DEF}\n"
 
 # Make internal ACT led accessible
 sudo chmod 666 /sys/class/leds/ACT/brightness
