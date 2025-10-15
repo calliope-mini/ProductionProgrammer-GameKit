@@ -15,11 +15,29 @@ APP_DONE_LED=19
 
 # Utility function to change state of a light using gpioset (Pi 4 compatible)
 setLightState() {
-  gpioset gpiochip0 $1=$2 2>/dev/null || printf "${RED}Warning: GPIO$1 set failed${DEF}\n"
+  # Kill any existing gpioset processes for this pin
+  pkill -f "gpioset.*gpiochip0.*$1=" 2>/dev/null
+  
+  if [ "$2" = "1" ]; then
+    # Turn LED ON (run in background to keep it on)
+    gpioset --mode=signal gpiochip0 $1=1 &
+  else
+    # Turn LED OFF (just set to 0, no need to keep process running)
+    gpioset gpiochip0 $1=0 2>/dev/null
+  fi
 }
 
 # Initialize GPIO pins (Pi 4 compatible - no export needed with gpioset)
 printf "${GRE}Initializing GPIO LEDs on pins $IF_DONE_LED and $APP_DONE_LED${DEF}\n"
+
+# Test LEDs briefly
+printf "${MAG}Testing LEDs...${DEF}\n"
+setLightState $IF_DONE_LED 1
+setLightState $APP_DONE_LED 1
+sleep 1
+setLightState $IF_DONE_LED 0
+setLightState $APP_DONE_LED 0
+printf "${GRE}LED test complete${DEF}\n"
 
 # Make internal ACT led accessible
 sudo chmod 666 /sys/class/leds/ACT/brightness
