@@ -12,7 +12,7 @@ GRE='\x1b[32;49m'
 # LEDs on Header on GPIO 21 and 7
 IF_DONE_LED=21
 APP_DONE_LED=7
-jlink
+
 # Utility function to export a pin if not already exported
 exportPin() {
   if [ ! -e /sys/class/gpio/gpio$1 ]; then

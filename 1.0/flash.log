@@ -4,16 +4,8 @@ For bug reports, read
 	http://openocd.org/doc/doxygen/bugs.html
 Warn : DEPRECATED: auto-selecting transport "swd (dapdirect)". Use 'transport select swd' to suppress this message.
 Info : STLINK V3J15M7 (API v3) VID:PID 0483:3754
-Info : Target voltage: 3.271856
+Info : Target voltage: 3.268085
 Info : clock speed 1000 kHz
-Info : SWD DPIDR 0x0bb11477
-Info : [stm32f0x.cpu] Cortex-M0 r0p0 processor detected
-Info : [stm32f0x.cpu] target has 4 breakpoints, 2 watchpoints
-Info : [stm32f0x.cpu] Examination succeed
-Info : [stm32f0x.cpu] starting gdb server on 3333
-Info : Listening on port 3333 for gdb connections
-[stm32f0x.cpu] halted due to debug-request, current mode: Thread 
-xPSR: 0xc1000000 pc: 0x080023d4 msp: 0x20001000
-Info : device id = 0x20006440
-Info : flash size = 64 KiB
-Warn : Adding extra erase range, 0x08002930 .. 0x08002bff
+Error: Fail reading CTRL/STAT register. Force reconnect
+
+
