@@ -9,26 +9,6 @@ RED='\x1b[39;41;1m'
 DEF='\x1b[39;49m'
 GRE='\x1b[32;49m'
 
-# LEDs on Header on GPIO 18 and 19 (more compatible with Pi 4)
-IF_DONE_LED=18
-APP_DONE_LED=19
-
-# Utility function to change state of a light using gpioset (Pi 4 compatible)
-setLightState() {
-  # Kill any existing gpioset processes for this pin
-  pkill -f "gpioset.*gpiochip0.*$1=" 2>/dev/null
-  
-  if [ "$2" = "1" ]; then
-    # Turn LED ON (run in background to keep it on)
-    gpioset gpiochip0 $1=1 &
-  else
-    # Turn LED OFF (just set to 0, no need to keep process running)
-    gpioset gpiochip0 $1=0 2>/dev/null
-  fi
-}
-
-# Initialize GPIO pins (Pi 4 compatible - no export needed with gpioset)
-printf "${GRE}Initializing GPIO LEDs on pins $IF_DONE_LED and $APP_DONE_LED${DEF}\n"
 
 # Debug environment info
 printf "${MAG}=== Environment Debug ===${DEF}\n"
@@ -39,17 +19,14 @@ printf "OpenOCD path: $(which openocd)\n"
 printf "Working directory: $(pwd)\n"
 printf "${MAG}=== End Environment Debug ===${DEF}\n"
 
-# Test LEDs briefly
-printf "${MAG}Testing LEDs...${DEF}\n"
-setLightState $IF_DONE_LED 1
-setLightState $APP_DONE_LED 1
-sleep 1
-setLightState $IF_DONE_LED 0
-setLightState $APP_DONE_LED 0
-printf "${GRE}LED test complete${DEF}\n"
+
 
 # Make internal ACT led accessible
 sudo chmod 666 /sys/class/leds/ACT/brightness
+sudo chmod 666 /sys/class/leds/PWR/brightness
+
+echo 0>/sys/class/leds/PWR/brightness  # Turn on power LED
+
 
 while true; do # Main production loop
     while true; do # Inner loop for error recovery
@@ -61,8 +38,6 @@ while true; do # Main production loop
         while true; do
             printf "${MAG}START - Waiting for STM32F030 target${DEF}\n"
             START=$SECONDS
-            setLightState $APP_DONE_LED 0
-            setLightState $IF_DONE_LED 0
             
             # Check if STM32F030 target is connected and responsive
             openocd -f interface/stlink.cfg -f target/stm32f0x.cfg -c "adapter speed 400; init; targets; exit" >detect.log 2>&1
@@ -100,8 +75,6 @@ while true; do # Main production loop
         
         if (( FLASHED > 0 )); then 
             printf "${GRE}STM32F030: GameKit firmware flashed successfully${DEF}\n"
-            setLightState $IF_DONE_LED 1
-            setLightState $APP_DONE_LED 1
             echo 1 > /sys/class/leds/ACT/brightness  # Turn on green ACT LED
             
             # Calculate elapsed time and log success
