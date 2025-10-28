@@ -25,12 +25,12 @@ printf "${MAG}=== End Environment Debug ===${DEF}\n"
 sudo chmod 666 /sys/class/leds/ACT/brightness
 sudo chmod 666 /sys/class/leds/PWR/brightness
 
-echo 0>/sys/class/leds/PWR/brightness  # Turn on power LED
+echo 1>/sys/class/leds/ACT/brightness  # Turn on ACT LED
 
 
 while true; do # Main production loop
     while true; do # Inner loop for error recovery
-        echo 0 > /sys/class/leds/ACT/brightness  # Turn off green ACT LED
+        echo 1 > /sys/class/leds/PWR/brightness  # Turn off red power LED
         TARGET_DETECTED=0
         FLASHED=0
         
@@ -75,7 +75,7 @@ while true; do # Main production loop
         
         if (( FLASHED > 0 )); then 
             printf "${GRE}STM32F030: GameKit firmware flashed successfully${DEF}\n"
-            echo 1 > /sys/class/leds/ACT/brightness  # Turn on green ACT LED
+            echo 0 > /sys/class/leds/PWR/brightness  # Turn on red power LED
             
             # Calculate elapsed time and log success
             ELAPSED=$(($SECONDS - $START))
