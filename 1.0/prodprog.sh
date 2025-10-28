@@ -40,7 +40,7 @@ while true; do # Main production loop
             START=$SECONDS
             
             # Check if STM32F030 target is connected and responsive
-            openocd -f interface/stlink.cfg -f target/stm32f0x.cfg -c "adapter speed 400; init; targets; exit" >detect.log 2>&1
+            openocd -f interface/stlink.cfg -f target/stm32f0x.cfg -c "transport select swd; adapter speed 400; init; targets; exit" >detect.log 2>&1
             TARGET_DETECTED=$(grep -c "Cortex-M0.*processor detected\|Examination succeed" detect.log)
             
             if ((TARGET_DETECTED > 0)); then 
@@ -67,10 +67,10 @@ while true; do # Main production loop
         
         # Unlock and Flash GameKit Firmware to STM32F030
         printf "${MAG}Unlocking STM32F030${DEF}\n"
-        openocd -f interface/stlink.cfg -f target/stm32f0x.cfg -c "adapter speed 400; init; reset halt; stm32f0x unlock 0; exit" > unlock.log 2>&1
+        openocd -f interface/stlink.cfg -f target/stm32f0x.cfg -c "transport select swd; adapter speed 400; init; reset halt; stm32f0x unlock 0; exit" > unlock.log 2>&1
         
         printf "${MAG}Start flashing STM32F030 with GameKit firmware${DEF}\n"
-        openocd -f interface/stlink.cfg -f target/stm32f0x.cfg -c "adapter speed 400; init; reset halt; flash write_image erase $APPLICATION_FW; verify_image $APPLICATION_FW; reset run; exit" > flash.log 2>&1
+        openocd -f interface/stlink.cfg -f target/stm32f0x.cfg -c "transport select swd; adapter speed 400; init; reset halt; flash write_image erase $APPLICATION_FW; verify_image $APPLICATION_FW; reset run; exit" > flash.log 2>&1
         FLASHED=$(grep -c "flash size\|wrote.*bytes\|verified.*bytes\|Examination succeed" flash.log)
         
         if (( FLASHED > 0 )); then 
@@ -98,7 +98,7 @@ while true; do # Main production loop
         # Wait for STM32F030 disconnection
         printf "${MAG}Test and disconnect STM32F030${DEF}\n"
         while true; do
-            openocd -f interface/stlink.cfg -f target/stm32f0x.cfg -c "adapter speed 400; init; targets; exit" >detect.log 2>&1
+            openocd -f interface/stlink.cfg -f target/stm32f0x.cfg -c "transport select swd; adapter speed 400; init; targets; exit" >detect.log 2>&1
             TARGET_DETECTED=$(grep -c "Cortex-M0.*processor detected\|Examination succeed" detect.log)
             
             if ((TARGET_DETECTED > 0)); then 
