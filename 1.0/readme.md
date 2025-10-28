@@ -1,16 +1,27 @@
-## Requirements
-- Raspberry Pi 
-- STLink 
-- openocd V0.12
+## Description
+This folder contains a tool for headless production programming of STM32F030 ICs with the Calliope GameKit firmware. It consists of 1 shell script and 1 service . The service runs an infinite-loop script, which executes the following steps: 
+1. Wait for STM32F030 target detection via OpenOCD (target connection check)
+2. Flash GameKit Firmware to STM32F030 using OpenOCD
+3. Light up red PWR led when flashing is finished
+4. Wait for tests to be done and disconnection of STM32F030
 
-- udevrule 
+## Requirements
+- Raspberry Pi (4)
+- STLink-V3MINIE
+- openocd V0.12 (e.g. xpack on arm64 https://github.com/xpack-dev-tools/openocd-xpack/releases)
+- udevrule (inside this repo)
 - sudo usermod -a -G dialout $USER
 
 
 ## Raspberry Pi Preparation Steps:
+- install Raspberry Pi OS (64bit)
 - get control of ACT led in /boot/config.txt by adding to the bottom:
+
 dtparam=act_led_trigger=none
 dtparam=act_led_activelow=off
+dtparam=pwr_led_trigger=default-on
+dtparam=pwr_led_activelow=off
+
 - clone this repo
 - copy service to systemd with sudo cp prodprog.service /lib/systemd/system/
 - reload services with sudo systemctl daemon-reload

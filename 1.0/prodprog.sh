@@ -25,7 +25,7 @@ printf "${MAG}=== End Environment Debug ===${DEF}\n"
 sudo chmod 666 /sys/class/leds/ACT/brightness
 sudo chmod 666 /sys/class/leds/PWR/brightness
 
-echo 1>/sys/class/leds/ACT/brightness  # Turn on ACT LED
+echo 1 >/sys/class/leds/ACT/brightness  # Turn on ACT LED
 
 
 while true; do # Main production loop
