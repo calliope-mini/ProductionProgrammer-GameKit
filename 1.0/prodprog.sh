@@ -72,9 +72,6 @@ if check_raspberry_pi; then
         printf "${RED}Warning: Cannot access PWR LED - continuing without LED status${DEF}\n"
         LED_ACCESS=false
     fi
-    # Update PATH for OpenOCD
-    export PATH="$(pwd)/xpack-openocd/bin:$PATH"
-
 fi
 
 
@@ -105,7 +102,7 @@ fi
 while true; do # Main production loop
     while true; do # Inner loop for error recovery
         if $LED_ACCESS; then
-            echo 1 > /sys/class/leds/PWR/brightness  # Turn off red power LED
+            echo 1 > /sys/class/leds/ACT/brightness  # Turn on ACT LED
         fi
         TARGET_DETECTED=0
         FLASHED=0
@@ -152,7 +149,7 @@ while true; do # Main production loop
         if (( FLASHED > 0 )); then 
             printf "${GRE}STM32F030: GameKit firmware flashed successfully${DEF}\n"
             if $LED_ACCESS; then
-                echo 0 > /sys/class/leds/PWR/brightness  # Turn on red power LED
+                echo 0 > /sys/class/leds/ACT/brightness  # Turn off ACT LED
             fi
             
             # Calculate elapsed time and log success
