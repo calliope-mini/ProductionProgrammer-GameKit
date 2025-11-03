@@ -15,7 +15,7 @@ This folder contains a tool for headless production programming of STM32F030 ICs
 
 ## Raspberry Pi Preparation Steps:
 - install Raspberry Pi OS (64bit)
-- get control of ACT led in /boot/config.txt by adding to the bottom:
+- get control of ACT led in /boot/firmware/config.txt by adding to the bottom:
 
 dtparam=act_led_trigger=none
 dtparam=act_led_activelow=off
