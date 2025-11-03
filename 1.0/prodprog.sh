@@ -16,6 +16,21 @@ RED='\x1b[39;41;1m'
 DEF='\x1b[39;49m'
 GRE='\x1b[32;49m'
 
+
+check_raspberry_pi() {
+    local is_rpi=false
+    # Method 1: Check /proc/device-tree/model (most reliable for RPi)
+    if [[ -f /proc/device-tree/model ]] && grep -qi "raspberry pi" /proc/device-tree/model 2>/dev/null; then
+        is_rpi=true
+        printf "${GRE}✓ Running on Raspberry Pi${DEF}\n"
+        if [[ -f /proc/device-tree/model ]]; then
+            printf "Model: $(cat /proc/device-tree/model 2>/dev/null | tr -d '\0')\n"
+        fi
+        return 0
+    fi
+        return 1
+}
+
 # Safety checks before starting production
 printf "${MAG}=== Production Safety Checks ===${DEF}\n"
 
@@ -47,15 +62,21 @@ printf "${GRE}✓ OpenOCD found: $(which openocd)${DEF}\n"
 
 # Check LED access (non-fatal if not available)
 LED_ACCESS=true
-if ! sudo chmod 666 /sys/class/leds/ACT/brightness 2>/dev/null; then
-    printf "${RED}Warning: Cannot access ACT LED - continuing without LED status${DEF}\n"
-    LED_ACCESS=false
+if check_raspberry_pi; then
+    if ! sudo chmod 666 /sys/class/leds/ACT/brightness 2>/dev/null; then
+        printf "${RED}Warning: Cannot access ACT LED - continuing without LED status${DEF}\n"
+        LED_ACCESS=false
+    fi
+
+    if ! sudo chmod 666 /sys/class/leds/PWR/brightness 2>/dev/null; then
+        printf "${RED}Warning: Cannot access PWR LED - continuing without LED status${DEF}\n"
+        LED_ACCESS=false
+    fi
+    # Update PATH for OpenOCD
+    export PATH="$(pwd)/xpack-openocd/bin:$PATH"
+
 fi
 
-if ! sudo chmod 666 /sys/class/leds/PWR/brightness 2>/dev/null; then
-    printf "${RED}Warning: Cannot access PWR LED - continuing without LED status${DEF}\n"
-    LED_ACCESS=false
-fi
 
 if $LED_ACCESS; then
     printf "${GRE}✓ LED access configured${DEF}\n"
