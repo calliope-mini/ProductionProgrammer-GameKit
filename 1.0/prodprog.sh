@@ -142,6 +142,13 @@ while true; do # Main production loop
         printf "${MAG}Unlocking STM32F030${DEF}\n"
         openocd -f interface/stlink.cfg -c "transport select swd" -f target/stm32f0x.cfg -c "adapter speed $ADAPTER_SPEED; init; reset halt; stm32f0x unlock 0; exit" > unlock.log 2>&1
         
+        printf "${MAG}Full chip erase STM32F030${DEF}\n"
+        openocd -f interface/stlink.cfg -c "transport select swd" -f target/stm32f0x.cfg -c "adapter speed 400; init; reset halt; flash erase_sector 0 0 63; reset; exit" > erase.log 2>&1
+        if grep -q "failed erasing sectors" erase.log; then
+            printf "${RED}STM32F030: Flash erase failed${DEF}\n"
+            break
+        fi
+
         printf "${MAG}Start flashing STM32F030 with GameKit firmware${DEF}\n"
         openocd -f interface/stlink.cfg -c "transport select swd" -f target/stm32f0x.cfg -c "adapter speed $ADAPTER_SPEED; init; reset halt; flash write_image erase $APPLICATION_FW; verify_image $APPLICATION_FW; reset run; exit" > flash.log 2>&1
         FLASHED=$(grep -c "flash size\|wrote.*bytes\|verified.*bytes\|Examination succeed" flash.log)
